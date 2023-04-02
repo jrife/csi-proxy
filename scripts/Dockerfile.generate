@@ -1,0 +1,10 @@
+FROM golang:1.20.2
+WORKDIR /tmp/csi-proxy
+ADD . .
+RUN go install github.com/golang/protobuf/protoc-gen-go
+
+FROM ubuntu:20.04
+RUN apt update
+RUN apt install -y protobuf-compiler
+COPY --from=0 /go/bin/* /usr/local/bin/
+WORKDIR /home/me

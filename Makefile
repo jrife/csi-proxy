@@ -19,18 +19,17 @@ compile-csi-proxy-api-gen:
 .PHONY: generate
 generate: generate-protobuf generate-csi-proxy-api-gen
 
-# using xargs instead of -exec since the latter doesn't propagate exit statuses
 .PHONY: generate-protobuf
 generate-protobuf:
-	@ if ! which protoc > /dev/null 2>&1; then echo 'Unable to find protoc binary' ; exit 1; fi
-	@ generate_protobuf_for() { \
-		local FILE="$$1"; \
-		local FILE_DIR="$$(dirname "$(GOPATH)/$$FILE")"; \
-                echo "Generating protobuf file from $$FILE in $$FILE_DIR"; \
-                protoc -I "$(GOPATH)/src/" -I '$(REPO_ROOT)/client/api' "$$FILE" --go_out=plugins="grpc:$(GOPATH)/src"; \
-        } ; \
-        export -f generate_protobuf_for; \
-        find '$(REPO_ROOT)' -not -path './vendor/*' -name '*.proto' | sed -e "s|$(GOPATH)/src/||g" | xargs -n1 '$(SHELL)' -c 'generate_protobuf_for "$$0"'
+	docker build -t csi-proxy-protogen -f ./scripts/Dockerfile.generate .
+	docker run \
+		--rm \
+		-v /etc/passwd:/etc/passwd \
+		-u $(shell id -u):$(shell id -g) \
+		-v $(shell pwd):/home/me/csi-proxy \
+		-e REPO_ROOT=/home/me/csi-proxy \
+		csi-proxy-protogen \
+		/home/me/csi-proxy/scripts/generate-proto.sh
 
 .PHONY: generate-csi-proxy-api-gen
 generate-csi-proxy-api-gen: compile-csi-proxy-api-gen
