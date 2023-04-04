@@ -94,6 +94,9 @@ message SetDiskStateRequest {
 
     // Online state to set for the disk. true for online, false for offline.
     bool is_online = 2;
+
+    // Readonly state to set for the disk.
+    bool is_readonly = 3;
 }
 
 message SetDiskStateResponse {
@@ -108,4 +111,7 @@ message GetDiskStateRequest {
 message GetDiskStateResponse {
     // Online state of the disk. true for online, false for offline.
     bool is_online = 1;
+
+    // Readonly state of the disk.
+    bool is_readonly = 2;
 }

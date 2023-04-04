@@ -77,6 +77,7 @@ func Convert_impl_GetDiskStateRequest_To_v1_GetDiskStateRequest(in *impl.GetDisk
 
 func autoConvert_v1_GetDiskStateResponse_To_impl_GetDiskStateResponse(in *v1.GetDiskStateResponse, out *impl.GetDiskStateResponse) error {
 	out.IsOnline = in.IsOnline
+	out.IsReadonly = in.IsReadonly
 	return nil
 }
 
@@ -87,6 +88,7 @@ func Convert_v1_GetDiskStateResponse_To_impl_GetDiskStateResponse(in *v1.GetDisk
 
 func autoConvert_impl_GetDiskStateResponse_To_v1_GetDiskStateResponse(in *impl.GetDiskStateResponse, out *v1.GetDiskStateResponse) error {
 	out.IsOnline = in.IsOnline
+	out.IsReadonly = in.IsReadonly
 	return nil
 }
 
@@ -300,6 +302,7 @@ func Convert_impl_RescanResponse_To_v1_RescanResponse(in *impl.RescanResponse, o
 func autoConvert_v1_SetDiskStateRequest_To_impl_SetDiskStateRequest(in *v1.SetDiskStateRequest, out *impl.SetDiskStateRequest) error {
 	out.DiskNumber = in.DiskNumber
 	out.IsOnline = in.IsOnline
+	out.IsReadonly = in.IsReadonly
 	return nil
 }
 
@@ -311,6 +314,7 @@ func Convert_v1_SetDiskStateRequest_To_impl_SetDiskStateRequest(in *v1.SetDiskSt
 func autoConvert_impl_SetDiskStateRequest_To_v1_SetDiskStateRequest(in *impl.SetDiskStateRequest, out *v1.SetDiskStateRequest) error {
 	out.DiskNumber = in.DiskNumber
 	out.IsOnline = in.IsOnline
+	out.IsReadonly = in.IsReadonly
 	return nil
 }
 

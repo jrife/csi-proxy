@@ -45,10 +45,10 @@ type API interface {
 	ListDiskIDs() (map[uint32]shared.DiskIDs, error)
 	// GetDiskStats gets the disk stats of the disk `diskNumber`.
 	GetDiskStats(diskNumber uint32) (int64, error)
-	// SetDiskState sets the offline/online state of the disk `diskNumber`.
-	SetDiskState(diskNumber uint32, isOnline bool) error
-	// GetDiskState gets the offline/online state of the disk `diskNumber`.
-	GetDiskState(diskNumber uint32) (bool, error)
+	// SetDiskState sets the offline/online and readonly state of the disk `diskNumber`.
+	SetDiskState(diskNumber uint32, isOnline bool, isReadonly bool) error
+	// GetDiskState gets the offline/online and readonly state of the disk `diskNumber`.
+	GetDiskState(diskNumber uint32) (isOnline bool, isReadonly bool, err error)
 }
 
 // DiskAPI implements the OS API calls related to Disk Devices. All code here should be very simple
@@ -342,8 +342,8 @@ func (imp DiskAPI) GetDiskStats(diskNumber uint32) (int64, error) {
 	return diskSize, nil
 }
 
-func (imp DiskAPI) SetDiskState(diskNumber uint32, isOnline bool) error {
-	cmd := fmt.Sprintf("(Get-Disk -Number %d) | Set-Disk -IsOffline $%t", diskNumber, !isOnline)
+func (imp DiskAPI) SetDiskState(diskNumber uint32, isOnline bool, isReadonly bool) error {
+	cmd := fmt.Sprintf("Set-Disk -Number %d -IsOffline $%t; Set-Disk -Number %d -IsReadOnly $%t", diskNumber, !isOnline, diskNumber, isReadonly)
 	out, err := utils.RunPowershellCmd(cmd)
 	if err != nil {
 		return fmt.Errorf("error setting disk attach state. cmd: %s, output: %s, error: %v", cmd, string(out), err)
@@ -352,18 +352,30 @@ func (imp DiskAPI) SetDiskState(diskNumber uint32, isOnline bool) error {
 	return nil
 }
 
-func (imp DiskAPI) GetDiskState(diskNumber uint32) (bool, error) {
+func (imp DiskAPI) GetDiskState(diskNumber uint32) (isOnline bool, isReadonly bool, err error) {
 	cmd := fmt.Sprintf("(Get-Disk -Number %d) | Select-Object -ExpandProperty IsOffline", diskNumber)
 	out, err := utils.RunPowershellCmd(cmd)
 	if err != nil {
-		return false, fmt.Errorf("error getting disk state. cmd: %s, output: %s, error: %v", cmd, string(out), err)
+		return false, false, fmt.Errorf("error getting disk state. cmd: %s, output: %s, error: %v", cmd, string(out), err)
 	}
 
 	sout := strings.TrimSpace(string(out))
 	isOffline, err := strconv.ParseBool(sout)
 	if err != nil {
-		return false, fmt.Errorf("error parsing disk state. output: %s, error: %v", sout, err)
+		return false, false, fmt.Errorf("error parsing disk state. output: %s, error: %v", sout, err)
 	}
 
-	return !isOffline, nil
+	cmd = fmt.Sprintf("(Get-Disk -Number %d) | Select-Object -ExpandProperty IsOffline", diskNumber)
+	out, err = utils.RunPowershellCmd(cmd)
+	if err != nil {
+		return false, false, fmt.Errorf("error getting disk state. cmd: %s, output: %s, error: %v", cmd, string(out), err)
+	}
+
+	sout = strings.TrimSpace(string(out))
+	isReadonly, err = strconv.ParseBool(sout)
+	if err != nil {
+		return false, false, fmt.Errorf("error parsing disk state. output: %s, error: %v", sout, err)
+	}
+
+	return !isOffline, isReadonly, nil
 }

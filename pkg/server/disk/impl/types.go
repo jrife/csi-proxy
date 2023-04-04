@@ -66,6 +66,9 @@ type SetDiskStateRequest struct {
 
 	// Online state to set for the disk. true for online, false for offline
 	IsOnline bool
+
+	// Readonly state to set for the disk.
+	IsReadonly bool
 }
 
 type SetDiskStateResponse struct {
@@ -79,6 +82,9 @@ type GetDiskStateRequest struct {
 type GetDiskStateResponse struct {
 	// Online state of the disk. true for online, false for offline
 	IsOnline bool
+
+	// Readonly state of the disk.
+	IsReadonly bool
 }
 
 // These structs are used in pre v1beta3 API versions
